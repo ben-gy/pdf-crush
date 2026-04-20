@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#ffffff" />
+
+    <title>PDF Crush — Shrink PDFs in your browser</title>
+    <meta name="description" content="Compress PDFs entirely in your browser. No uploads, no accounts, no server. Your documents never leave your device." />
+
+    <meta property="og:title" content="PDF Crush — Shrink PDFs in your browser" />
+    <meta property="og:description" content="Compress PDFs entirely in your browser. No uploads, no accounts, no server." />
+    <meta property="og:type" content="website" />
+
+    <!-- CSP: self + wasm-unsafe-eval for WASM modules + blob: for pdf.js worker + data: for inline images -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' blob:; worker-src 'self' blob:; child-src 'self' blob:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'none';"
+    />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="topbar-left">
+          <a class="brand" href="/">
+            <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+              <rect width="32" height="32" rx="7" fill="#2563eb"/>
+              <path d="M7 4h10l4 4v14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" fill="none" stroke="white" stroke-width="1.5" opacity="0.9"/>
+              <path d="M17 4v4h4" fill="none" stroke="white" stroke-width="1.5" opacity="0.7"/>
+              <path d="M10 24 L16 28 L22 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              <line x1="16" y1="22" x2="16" y2="28" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+            <span class="brand-name">PDF <span class="brand-accent">Crush</span></span>
+          </a>
+          <div class="topbar-meta">
+            <span class="meta-pill">MozJPEG WASM</span>
+            <span class="meta-pill">no uploads</span>
+          </div>
+        </div>
+        <nav class="topbar-nav">
+          <button type="button" class="nav-link" data-modal="tmpl-how-it-works">how it works</button>
+          <button type="button" class="nav-link" data-modal="tmpl-threat-model">threat model</button>
+          <button type="button" class="nav-link" data-modal="tmpl-about">about</button>
+        </nav>
+      </header>
+
+      <div class="main-grid">
+        <main id="app" role="main">
+          <!-- Populated by src/main.ts -->
+        </main>
+        <aside id="event-drawer" aria-label="Event log">
+          <!-- Populated by src/eventlog.ts -->
+        </aside>
+      </div>
+
+      <footer class="statusbar">
+        <div class="statusbar-left">
+          <span class="status-pill">
+            <span class="dot" id="sb-dot"></span>
+            <span id="sb-label">idle</span>
+          </span>
+          <span id="sb-pages" class="status-pill hidden"></span>
+        </div>
+        <div class="statusbar-right">
+          <button type="button" class="drawer-toggle" id="drawer-toggle" aria-pressed="false" title="Toggle event log">log</button>
+          <span class="attribution">Built by <a href="https://benrichardson.dev/" target="_blank" rel="noopener noreferrer">benrichardson.dev</a></span>
+        </div>
+      </footer>
+    </div>
+
+    <!-- ── Modals ── -->
+
+    <template id="tmpl-how-it-works">
+      <div class="modal-content">
+        <h2 class="modal-title">How it works</h2>
+        <ol class="steps">
+          <li>
+            <span class="step-num">01</span>
+            <div>
+              <h3>Drop your PDF</h3>
+              <p>The file is read locally by your browser using the File API. It never leaves your device — there is no upload step.</p>
+            </div>
+          </li>
+          <li>
+            <span class="step-num">02</span>
+            <div>
+              <h3>Pages are rasterised</h3>
+              <p>pdf.js renders each page to an HTML Canvas at your chosen resolution (default 150 DPI). Higher DPI = more detail, larger file.</p>
+            </div>
+          </li>
+          <li>
+            <span class="step-num">03</span>
+            <div>
+              <h3>MozJPEG compresses each page</h3>
+              <p>A Web Worker runs MozJPEG (Mozilla's tuned JPEG encoder compiled to WebAssembly) to compress each page image. MozJPEG typically saves 20–30% more than the browser's built-in JPEG encoder at the same visual quality.</p>
+            </div>
+          </li>
+          <li>
+            <span class="step-num">04</span>
+            <div>
+              <h3>A new PDF is assembled</h3>
+              <p>pdf-lib rebuilds the PDF by embedding the compressed JPEG pages. The output is a standard PDF you can open anywhere. <strong>Note:</strong> rasterising removes selectable text and annotations — the output is an image PDF.</p>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </template>
+
+    <template id="tmpl-threat-model">
+      <div class="modal-content">
+        <h2 class="modal-title">Threat model</h2>
+        <div class="security-grid">
+          <div class="security-card good">
+            <h3>Protected</h3>
+            <ul>
+              <li>Your PDF contents — processed entirely in the browser, never uploaded anywhere</li>
+              <li>All compression runs locally in a Web Worker</li>
+              <li>Output file created in-memory and handed to you via a local Blob URL</li>
+              <li>No cookies, no local storage, no analytics, no telemetry</li>
+            </ul>
+          </div>
+          <div class="security-card warn">
+            <h3>Not protected</h3>
+            <ul>
+              <li>GitHub Pages CDN logs that you loaded the page (IP address, User-Agent, timestamp)</li>
+              <li>The pdfjs-dist and WASM assets are also fetched from the same CDN — same log entry</li>
+              <li>Output is an image-only PDF (no selectable text, no annotations)</li>
+            </ul>
+          </div>
+          <div class="security-card neutral">
+            <h3>Trust surface</h3>
+            <ul>
+              <li>The static bundle served from GitHub Pages (auditable at the source repo)</li>
+              <li>TLS chain between your browser and GitHub Pages CDN</li>
+              <li>No third-party JavaScript, no external fonts, no trackers</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <template id="tmpl-about">
+      <div class="modal-content">
+        <h2 class="modal-title">About PDF Crush</h2>
+        <p>PDF Crush compresses PDF files entirely in your browser using <strong>MozJPEG</strong> (compiled to WebAssembly) and <strong>pdf-lib</strong>. No server, no uploads, no account needed.</p>
+        <p>Built as part of a series of privacy-first browser tools by <a href="https://benrichardson.dev/" target="_blank" rel="noopener noreferrer">benrichardson.dev</a>.</p>
+        <p style="margin-top: 1rem; font-size: 0.8rem; color: var(--text-tertiary);">Stack: Vite · TypeScript · pdfjs-dist · @jsquash/jpeg · pdf-lib · Vitest</p>
+      </div>
+    </template>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

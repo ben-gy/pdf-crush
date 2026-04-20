@@ -1,0 +1,23 @@
+import { defineConfig } from 'vite';
+import wasm from 'vite-plugin-wasm';
+import topLevelAwait from 'vite-plugin-top-level-await';
+
+export default defineConfig({
+  base: '/',
+  plugins: [wasm(), topLevelAwait()],
+  build: {
+    target: 'es2022',
+    sourcemap: true,
+  },
+  worker: {
+    format: 'es',
+    plugins: () => [wasm(), topLevelAwait()],
+  },
+  optimizeDeps: {
+    exclude: ['@jsquash/jpeg', 'pdfjs-dist'],
+  },
+  test: {
+    environment: 'jsdom',
+    globals: true,
+  },
+});
