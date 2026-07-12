@@ -36,7 +36,7 @@ The output is an image PDF (rasterised). Selectable text and annotations are not
 **Protected**
 - Full PDF contents — never leaves the device
 - All rendering and compression runs in-browser
-- No cookies, no localStorage for user data, no analytics, no telemetry
+- No cookies, no localStorage for user data, no fingerprinting — the only analytics is Cloudflare Web Analytics, anonymous cookie-less page-view counts with no personal data
 
 **Not protected**
 - GitHub Pages CDN logs that you loaded the page (IP, User-Agent, timestamp)
