@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Ben Richardson — https://benrichardson.dev
+// Additional terms under AGPL-3.0 section 7(b) apply; see ADDITIONAL-TERMS.md.
 export const GLOSSARY: Record<string, string> = {
   dpi: 'Dots Per Inch — controls how many pixels are used to represent each inch of the PDF page. Lower DPI = smaller file, less detail. 150 DPI is a good balance for screen viewing; 300 DPI for print.',
   mozjpeg: 'MozJPEG is Mozilla\'s JPEG encoder. It produces 20–30% smaller files than standard JPEG at the same visual quality, using advanced optimisation techniques. Here it runs as a WebAssembly module entirely in your browser.',

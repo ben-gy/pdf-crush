@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "description": "Shrink PDFs in your browser — no uploads, no accounts, no server.",
+  "license": "AGPL-3.0-or-later",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
